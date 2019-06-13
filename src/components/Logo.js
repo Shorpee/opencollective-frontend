@@ -2,13 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import withFallbackImage from '../lib/withFallbackImage';
+import { getBaseImagesUrl } from '../lib/utils';
 
-const Logo = ({ src, style = {}, height, className }) => {
+const Logo = ({ collective, src, style = {}, height, className }) => {
   style.maxHeight = style.height || height;
   const backgroundStyle = { height };
   if (height && parseInt(height, 10) == height) {
     backgroundStyle.minWidth = parseInt(height, 10) / 2;
+  }
+  if (collective) {
+    src = `${getBaseImagesUrl()}/${collective.slug}/logo.png`;
   }
   return (
     <div className={classNames('Logo', className)} style={backgroundStyle}>
@@ -35,10 +38,11 @@ const Logo = ({ src, style = {}, height, className }) => {
 };
 
 Logo.propTypes = {
+  collective: PropTypes.object,
   src: PropTypes.string,
   style: PropTypes.object,
   className: PropTypes.string,
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 };
 
-export default withFallbackImage(Logo);
+export default Logo;

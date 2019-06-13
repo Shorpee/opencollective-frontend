@@ -111,7 +111,7 @@ class ContributorCard extends React.PureComponent {
       <StyledContributorCard left={left + COLLECTIVE_CARD_MARGIN_X} top={top + COLLECTIVE_CARD_MARGIN_Y}>
         <Flex justifyContent="center" mb={3}>
           <Link route="collective" params={{ slug: collective.slug }}>
-            <Avatar src={collective.image} radius={56} name={collective.name} />
+            <Avatar collective={collective} radius={56} />
           </Link>
         </Flex>
         <Container display="flex" textAlign="center" flexDirection="column" justifyContent="center">

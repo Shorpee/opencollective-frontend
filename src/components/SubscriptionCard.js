@@ -468,7 +468,7 @@ class SubscriptionCard extends React.Component {
             </div>
           )}
           <div className="logo">
-            <Logo src={collective.image} type={collective.type} website={collective.website} height={65} />
+            <Logo collective={collective} height={65} />
           </div>
         </div>
 

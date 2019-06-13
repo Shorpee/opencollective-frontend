@@ -2,7 +2,6 @@ import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get } from 'lodash';
 
 import withData from '../lib/withData';
 import withIntl from '../lib/withIntl';
@@ -44,7 +43,6 @@ class TiersPage extends React.Component {
     }
 
     const collective = data.Collective;
-    const logo = collective.image || get(collective.parentCollective, 'image');
 
     return (
       <div>
@@ -61,7 +59,7 @@ class TiersPage extends React.Component {
             <Fragment>
               <Container display="flex" flexDirection="column" alignItems="center" width={1} my={4}>
                 <Link href={`/${collective.slug}`}>
-                  <Logo src={logo} height="10rem" />
+                  <Logo collective={collective} height="10rem" />
                 </Link>
                 <Link href={`/${collective.slug}`}>
                   <H3 lineHeight={1.2} color="black.800" textAlign="center">

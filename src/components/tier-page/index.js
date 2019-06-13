@@ -162,8 +162,7 @@ class TierPage extends Component {
             <Flex alignItems="center">
               <LinkCollective collective={collective}>
                 <Avatar
-                  type={collective.type}
-                  src={collective.image}
+                  collective={collective.collective}
                   backgroundColor="#EBEBEB"
                   border="1px solid #efefef"
                   radius={40}

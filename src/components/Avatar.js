@@ -4,7 +4,8 @@ import styled, { css } from 'styled-components';
 import { backgroundImage, backgroundColor, borders, borderColor, size, themeGet } from 'styled-system';
 import tag from 'clean-tag';
 import { Flex } from '@rebass/grid';
-import withFallbackImage from '../lib/withFallbackImage';
+
+import { getBaseImagesUrl } from '../lib/utils';
 
 const getInitials = name => name.split(' ').reduce((result, value) => (result += value.slice(0, 1).toUpperCase()), '');
 
@@ -36,8 +37,14 @@ StyledAvatar.defaultProps = {
   omitProps: tag.defaultProps.omitProps.concat('backgroundImage'),
 };
 
-export const Avatar = ({ src, type = 'USER', radius, name, ...styleProps }) => {
+const Avatar = ({ collective, src, type = 'USER', radius, name, ...styleProps }) => {
   const style = {};
+  // Use collective object instead of props
+  if (collective) {
+    type = collective.type;
+    name = collective.name;
+    src = `${getBaseImagesUrl()}/${collective.slug}/avatar.png`;
+  }
   // Avoid setting null/undefined background images
   if (src) {
     style.backgroundImage = `url(${src})`;
@@ -50,6 +57,8 @@ export const Avatar = ({ src, type = 'USER', radius, name, ...styleProps }) => {
 };
 
 Avatar.propTypes = {
+  /** Collective object */
+  collective: PropTypes.object,
   /** Collective name */
   name: PropTypes.string,
   /** Collective image url */
@@ -62,6 +71,4 @@ Avatar.propTypes = {
   animationDuration: PropTypes.number,
 };
 
-export const AvatarWithFallbackImage = withFallbackImage(Avatar);
-
-export default AvatarWithFallbackImage;
+export default Avatar;
