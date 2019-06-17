@@ -3,18 +3,22 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Query } from 'react-apollo';
 import gql from 'graphql-tag';
-
+import { FormattedMessage } from 'react-intl';
 import { withRouter } from 'next/router';
 import withIntl from '../lib/withIntl';
-
 import { Box, Flex } from '@rebass/grid';
+import styled from 'styled-components';
 import CollectiveCard from '../components/CollectiveCard';
+import PledgedCollectiveCard from '../components/PledgedCollectiveCard';
 import Container from '../components/Container';
 import Page from '../components/Page';
 import { H1, P } from '../components/Text';
 import LoadingGrid from '../components/LoadingGrid';
 import Pagination from '../components/Pagination';
 import MessageBox from '../components/MessageBox';
+import StyledSelect from '../components/StyledSelect';
+import { Link } from '../server/pages';
+import SearchForm from '../components/SearchForm';
 
 const DiscoverPageDataQuery = gql`
   query DiscoverPageDataQuery($offset: Int, $tags: [String], $orderBy: CollectiveOrderField, $limit: Int) {
@@ -42,12 +46,14 @@ const DiscoverPageDataQuery = gql`
         slug
         type
         website
+        githubHandle
         stats {
           yearlyBudget
           backers {
             all
           }
         }
+        isPledged
         memberOf {
           id
         }
@@ -67,9 +73,38 @@ const DiscoverPageDataQuery = gql`
   }
 `;
 
-const prepareTags = tags => {
-  return ['all'].concat(tags.map(tag => tag.toLowerCase()).sort());
+const NavList = styled(Flex)`
+  list-style: none;
+  min-width: 20rem;
+  text-align: right;
+  align-items: center;
+`;
+
+const NavLinkContainer = styled(Box)`
+  text-align: center;
+`;
+NavLinkContainer.defaultProps = {
+  as: 'li',
+  px: [1, 2, 3],
 };
+
+const NavLink = styled.a`
+  color: #777777;
+  font-size: 1.4rem;
+`;
+
+const SortSelect = styled(StyledSelect)`
+  width: 256px;
+`;
+
+const SearchFormContainer = styled(Box)`
+  max-width: 40rem;
+  min-width: 10rem;
+`;
+
+// const prepareTags = tags => {
+//   return ['all'].concat(tags.map(tag => tag.toLowerCase()).sort());
+// };
 
 const DiscoverPage = ({ router }) => {
   const { query } = router;
@@ -81,12 +116,25 @@ const DiscoverPage = ({ router }) => {
     limit: 12,
   };
 
-  const onChange = event => {
-    const { name, value } = event.target;
+  const applyFilter = (name, value) => {
     router.push({
       pathname: router.pathname,
       query: { ...router.query, offset: 0, [name]: value },
     });
+  };
+
+  const sortOptions = {
+    totalDonations: 'Most Popular',
+    newest: 'Newest',
+  };
+
+  const selectedSort = sortOptions[query.sort || 'totalDonations'];
+
+  const handleSubmit = event => {
+    const searchInput = event.target.elements.q;
+    console.log(searchInput);
+    //Router.pushRoute('search', { q: searchInput.value });
+    //event.preventDefault();
   };
 
   return (
@@ -103,7 +151,7 @@ const DiscoverPage = ({ router }) => {
                 backgroundRepeat="no-repeat"
                 display="flex"
                 flexDirection="column"
-                height={560}
+                height={328}
                 justifyContent="center"
                 textAlign="center"
               >
@@ -113,6 +161,12 @@ const DiscoverPage = ({ router }) => {
                 <P color="white.full" fontSize="H4" lineHeight="H4" mt={4}>
                   Let&apos;s make great things together.
                 </P>
+
+                <Flex justifyContent="center" flex="1 1 1">
+                  <SearchFormContainer p={2}>
+                    <SearchForm placeholder="Search tag" onSubmit={handleSubmit} />
+                  </SearchFormContainer>
+                </Flex>
               </Container>
               <Container
                 alignItems="center"
@@ -123,21 +177,58 @@ const DiscoverPage = ({ router }) => {
                 mx="auto"
                 position="relative"
                 px={2}
-                top={-120}
+                top={80}
                 width={1}
               >
-                <Flex width={[1, 0.8, 0.6]} justifyContent="space-evenly" flexWrap="wrap" mb={4}>
-                  <Flex width={[1, null, 0.5]} justifyContent="center" alignItems="center" mb={[3, null, 0]}>
+                <Flex width={[1]} justifyContent="center" flexWrap="wrap">
+                  <NavList as="ul" p={0} m={0} justifyContent="space-around" css="margin: 0;">
+                    <NavLinkContainer>
+                      <Link route="discover" passHref>
+                        <NavLink>
+                          <FormattedMessage id="discover.allCollectives" defaultMessage="All collectives" />
+                        </NavLink>
+                      </Link>
+                    </NavLinkContainer>
+                    <NavLinkContainer>
+                      <Link route="marketing" params={{ pageSlug: 'how-it-works' }} passHref>
+                        <NavLink>
+                          <FormattedMessage
+                            id="discover.openSourceCollectives"
+                            defaultMessage="Open source collectives"
+                          />
+                        </NavLink>
+                      </Link>
+                    </NavLinkContainer>
+                    <NavLinkContainer>
+                      <NavLink href="/pricing">
+                        <FormattedMessage id="discover.pledgedCollectives" defaultMessage="Pledged collectives" />
+                      </NavLink>
+                    </NavLinkContainer>
+                    <NavLinkContainer>
+                      <NavLink href="https://docs.opencollective.com">
+                        <FormattedMessage id="discover.other" defaultMessage="Other" />
+                      </NavLink>
+                    </NavLinkContainer>
+                  </NavList>
+
+                  <Flex width={[1, null, 0.5]} justifyContent="flex-end" alignItems="center" mb={[3, null, 0]}>
                     <P as="label" htmlFor="sort" color="white.full" fontSize="LeadParagraph" pr={2}>
                       Sort By
                     </P>
-                    <select name="sort" id="sort" value={query.sort || 'totalDonations'} onChange={onChange}>
-                      <option value="totalDonations">Most Popular</option>
-                      <option value="newest">Newest</option>
-                    </select>
+                    <SortSelect
+                      name="sort"
+                      id="sort"
+                      options={sortOptions}
+                      defaultValue={selectedSort}
+                      style={{ width: 256 }}
+                      placeholder={'Sort by'}
+                      onChange={selected => applyFilter('sort', selected.key)}
+                    >
+                      {({ value }) => <span style={{ display: 'flex', alignItems: 'flex-end' }}>{value}</span>}
+                    </SortSelect>
                   </Flex>
 
-                  <Flex width={[1, null, 0.5]} justifyContent="center" alignItems="center">
+                  {/* <Flex width={[1, null, 0.5]} justifyContent="center" alignItems="center">
                     <P as="label" htmlFor="show" color="white.full" fontSize="LeadParagraph" pr={2}>
                       Show
                     </P>
@@ -148,7 +239,7 @@ const DiscoverPage = ({ router }) => {
                         </option>
                       ))}
                     </select>
-                  </Flex>
+                  </Flex> */}
                 </Flex>
 
                 {loading && (
@@ -168,7 +259,11 @@ const DiscoverPage = ({ router }) => {
                     <Flex flexWrap="wrap" width={1} justifyContent="center">
                       {get(data, 'allCollectives.collectives', []).map(c => (
                         <Flex key={c.id} width={[1, 1 / 2, 1 / 4]} mb={3} justifyContent="center">
-                          <CollectiveCard collective={c} LoggedInUser={LoggedInUser} />
+                          {c.isPledged ? (
+                            <PledgedCollectiveCard collective={c} LoggedInUser={LoggedInUser} />
+                          ) : (
+                            <CollectiveCard collective={c} LoggedInUser={LoggedInUser} />
+                          )}
                         </Flex>
                       ))}
                     </Flex>
