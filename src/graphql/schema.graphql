@@ -1609,6 +1609,7 @@ input OrderInputType {
   publicMessage: String
   privateMessage: String
   paymentMethod: PaymentMethodInputType
+  customFields: JSON
 
   """
   The first part of the UUID of the PaymentMethod that can be used to match the donation
@@ -1681,6 +1682,7 @@ type OrderType {
   subscription: Subscription
   stats: StatsOrderType
   createdByUser: UserDetails
+  customFields: JSON
 
   """
   Description of the order that will show up in the invoice
