@@ -13,6 +13,7 @@ import Container from '../Container';
 import { AllSectionsNames, Sections, Dimensions } from './_constants';
 import Hero from './Hero';
 import SectionAbout from './SectionAbout';
+import SectionBudget from './SectionBudget';
 import SectionContribute from './SectionContribute';
 import SectionContributors from './SectionContributors';
 
@@ -150,6 +151,8 @@ export default class CollectivePage extends Component {
       return <SectionContributors collectiveName={collective.name} members={members} />;
     } else if (section === Sections.CONTRIBUTE) {
       return <SectionContribute collective={collective} tiers={tiers} events={events} />;
+    } else if (section === Sections.BUDGET) {
+      return <SectionBudget collective={collective} />;
     }
 
     // Placeholder for sections not implemented yet

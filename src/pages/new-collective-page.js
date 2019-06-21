@@ -148,6 +148,21 @@ const getCollective = graphql(gql`
         description
         image
       }
+      transactions(limit: 3) {
+        id
+        netAmountInCollectiveCurrency
+        type
+        fromCollective {
+          id
+          slug
+          name
+        }
+        usingVirtualCardFromCollective {
+          id
+          slug
+          name
+        }
+      }
     }
   }
 `);
