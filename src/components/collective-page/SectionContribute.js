@@ -51,13 +51,13 @@ class SectionContribute extends React.PureComponent {
   };
 
   static messages = defineMessages({
-    oneTimeTitle: {
-      id: 'CollectivePage.Contribute.OneTime',
-      defaultMessage: 'One time contribution',
+    customContribution: {
+      id: 'CollectivePage.Contribute.Custom',
+      defaultMessage: 'Custom contribution',
     },
-    oneTimeDescription: {
-      id: 'CollectivePage.Contribute.OneTime.Description',
-      defaultMessage: 'Not ready to go recurring, let’s go with a one time contribution!',
+    customContributionDetails: {
+      id: 'CollectivePage.Contribute.Custom.Description',
+      defaultMessage: 'Nothing there for you? Make a custom one time or recurring contribution.',
     },
   });
 
@@ -82,6 +82,8 @@ class SectionContribute extends React.PureComponent {
       goal: tier.goal,
       raised: tier.interval ? tier.stats.totalRecurringDonations : tier.stats.totalDonated,
       currency: tier.currency || collective.currency,
+      amountType: tier.amountType,
+      minAmount: tier.minimumAmount,
     };
   }
 
@@ -107,9 +109,9 @@ class SectionContribute extends React.PureComponent {
       // Static way to contribute: /donate
       {
         key: 'donate',
-        type: ContributionTypes.FINANCIAL_ONE_TIME,
-        title: intl.formatMessage(SectionContribute.messages.oneTimeTitle),
-        description: intl.formatMessage(SectionContribute.messages.oneTimeDescription),
+        type: ContributionTypes.FINANCIAL_CUSTOM,
+        title: intl.formatMessage(SectionContribute.messages.customContribution),
+        description: intl.formatMessage(SectionContribute.messages.customContributionDetails),
         contributeRoute: `/${collective.slug}/donate`,
       },
       // Add tiers as ways to contribute

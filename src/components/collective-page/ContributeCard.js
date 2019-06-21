@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { Flex, Box } from '@rebass/grid';
 import { truncate } from 'lodash';
 
+import { formatCurrency } from '../../lib/utils';
 import Link from '../Link';
 import StyledCard from '../StyledCard';
 import StyledTag from '../StyledTag';
@@ -50,6 +51,10 @@ const ContributionTypeTag = styled(StyledTag).attrs({
 
 /** Translations */
 const I18nContributionType = defineMessages({
+  [ContributionTypes.FINANCIAL_CUSTOM]: {
+    id: 'ContributionType.Custom',
+    defaultMessage: 'Custom contribution',
+  },
   [ContributionTypes.FINANCIAL_ONE_TIME]: {
     id: 'ContributionType.OneTime',
     defaultMessage: 'One time contribution',
@@ -68,12 +73,30 @@ const I18nContributionType = defineMessages({
   },
 });
 
+const messages = defineMessages({
+  fallbackDescription: {
+    id: 'ContributeCard.Description.Fallback',
+    defaultMessage:
+      '{title, select, backer {Become a backer} sponsor {Become a sponsor} other {Join us}} {minAmount, select, 0 {} other {for {minAmountWithCurrency} {interval, select, month {per month} year {per year} other {}}}} and help us sustain our activities!',
+  },
+});
+
 /**
  * A contribute card with a "Contribute" call to action
  */
 const ContributeCard = ({ intl, contribution }) => {
   const { type, title, contributeRoute } = contribution;
-  const { description, interval, raised, goal, currency, detailsRoute } = contribution;
+  const { description, minAmount, interval, raised, goal, currency, detailsRoute } = contribution;
+  let prettyDescription = description && truncate(description, { length: detailsRoute ? 60 : 256 });
+
+  if (!prettyDescription) {
+    prettyDescription = intl.formatMessage(messages.fallbackDescription, {
+      title: title && title.toLowerCase(),
+      interval,
+      minAmount: minAmount || 0,
+      minAmountWithCurrency: minAmount ? formatCurrency(minAmount, currency) : '',
+    });
+  }
 
   return (
     <StyledContributeCard>
@@ -125,18 +148,16 @@ const ContributeCard = ({ intl, contribution }) => {
               </Box>
             </Box>
           )}
-          {(description || detailsRoute) && (
-            <P mb={4} mt={2}>
-              {truncate(description, { length: detailsRoute ? 60 : 256 })}{' '}
-              {detailsRoute && (
-                <Link route={detailsRoute}>
-                  <Span textTransform="capitalize">
-                    <FormattedMessage id="ContributeCard.ReadMore" defaultMessage="Read more" />
-                  </Span>
-                </Link>
-              )}
-            </P>
-          )}
+          <P mb={4} mt={2}>
+            {prettyDescription}{' '}
+            {detailsRoute && (
+              <Link route={detailsRoute}>
+                <Span textTransform="capitalize">
+                  <FormattedMessage id="ContributeCard.ReadMore" defaultMessage="Read more" />
+                </Span>
+              </Link>
+            )}
+          </P>
         </div>
         <Link route={contributeRoute}>
           <StyledButton width={1} mb={2} mt={3}>
@@ -167,6 +188,10 @@ ContributeCard.propTypes = {
     detailsRoute: PropTypes.string,
     /** Description */
     description: PropTypes.node,
+    /** Min amount in cents */
+    minAmount: PropTypes.number,
+    /** Defines if the amount is fixed or flexible */
+    amounType: PropTypes.oneOf(['FIXED', 'FLEXIBLE']),
     /** Interval */
     interval: PropTypes.oneOf(['month', 'year']),
     /** Total amount raised in cents */

@@ -135,6 +135,8 @@ const getCollective = graphql(gql`
         goal
         interval
         currency
+        amount
+        minimumAmount
         stats {
           id
           totalDonated
